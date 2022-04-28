@@ -24,7 +24,7 @@ then
   directory=$OPTARG
   COMPLETEDIR=$(echo $directory | sed 's![^/]$!&/!')
 else
-  COMPLETEDIR=$(cat ~/.config/deluge/core.conf | grep "move_completed_path" | cut -d":" -f2 | cut -c2- | cut -d"," -f1 | sed 's/\"//g' | sed 's![^/]$!&/!')
+  COMPLETEDIR=$(cat ~/.config/deluge/core.conf | grep "move_completed_path\"" | cut -d":" -f2 | cut -c2- | cut -d"," -f1 | sed 's/\"//g' | sed 's![^/]$!&/!')
 fi
 
 if [ -z "$COMPLETEDIR" ]
@@ -69,8 +69,8 @@ fi
 # Get all torrent ID's from deluge daemon
 # Hiding error - yuck! - better to fix but can't do in a pssive manner here.
 printf "\033[30;40m"
-TORRENTS=($(deluge-console "connect \"127.0.0.1\":\"$DAEMONPORT\" \"$USERNAME\" \"$PASSWORD\"; info" | grep "ID:" | cut -c5-)) &> /dev/null
-printf "\\033[0m\n"
+TORRENTS=($(deluge-console "connect \"127.0.0.1\":\"$DAEMONPORT\" \"$USERNAME\" \"$PASSWORD\"; info -v" | grep "ID:" | cut -c5-)) &> /dev/null
+printf "\033[0m\n"
 if [ -z "$TORRENTS" ]
 then
   printf "\n\033[0;33mWarning: No torrents found\033[0m\n"
