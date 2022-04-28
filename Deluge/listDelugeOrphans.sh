@@ -111,13 +111,16 @@ sort -o completedfiles.tmp{,}
 
 # Run a diff to find files in COMPLETEDIR but not in Deluge
 diff completedfiles.tmp delugefiles.tmp | grep '^<' | sed 's/^<\ //' | sed  "s|^|$COMPLETEDIR|" | tail -n +2 > orphaned_files.txt
+sort -r -o orphaned_files.txt{,}
 
-printf "\n\033[0;32mFiles on file system but not in deluge are in: \033[0;33morphaned_files.txt\033[0m\n"
+printf "\033[0;32mFiles on file system but not in deluge are in: \033[0;33morphaned_files.txt\033[0m\n"
 
 printf "\nNo files are harmed during the making of utility\n"
-printf "It is your responsibiity to remove the orphaned files\n"
+printf "It is your responsibiity to remove the orphaned files. Review orphaned_files.txt NOW!\n\n"
 printf "The following command attempts to delete all the files in orphaned_files.txt\n"
-printf "\033[0;31mDANGER: Use at your own risk! \033[30;43mwhile read deletefiles; do  echo Deleting \"\$deletefiles\"; rm -d \"\$deletefiles\"; done < orphaned_files.txt\033[0m\n\n"
+printf "\033[0;31mDANGER: Copy and paste this command at your own risk!\033[0m\n"
+printf "\033[0;33mwhile read deletefiles; do  echo Deleting \"\$deletefiles\"; rm -d \"\$deletefiles\"; done < orphaned_files.txt ; rm orphaned_files.txt\033[0m\n"
+printf "\033[0;31m************** YOU HAVE BEEN WARNED! **************\033[0m\n"
 
 # Tidy up temp files
 rm curl.tmp cookie_deluge.tmp delugefiles.tmp completedfiles.tmp 2> /dev/null || true
