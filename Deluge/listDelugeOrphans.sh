@@ -70,7 +70,7 @@ fi
 # Hiding error - yuck! - better to fix but can't do in a pssive manner here.
 printf "\033[30;40m"
 TORRENTS=($(deluge-console "connect \"127.0.0.1\":\"$DAEMONPORT\" \"$USERNAME\" \"$PASSWORD\"; info" | grep "ID:" | cut -c5-)) &> /dev/null
-printf"\\033[0m\n"
+printf "\\033[0m\n"
 if [ -z "$TORRENTS" ]
 then
   printf "\n\033[0;33mWarning: No torrents found\033[0m\n"
