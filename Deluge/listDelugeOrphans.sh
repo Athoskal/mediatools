@@ -1,9 +1,12 @@
 #!/bin/bash
 
-# v001 - 2022-04-27
+# v002 - 2022-04-29
 # Written by warp for use on ultra.cc.
 # Tested on Deluge v1.3.15 without plugins that move completed downloads.
 # Said plugins may break script.
+
+# "WARNING: DO NOT RUN WITH -x ARGUMENT UNTIL YOU HAVE FULLY TESTEED THE CORRECT"
+#             "FILES ARE IDENTIFIED. USED AT YOUR OWN RISK."
 
 # Purpose is to create a list of files stored on disk in the deluge completed
 # directory that are not referenced in deluge. This helps recover wasted space
@@ -13,26 +16,73 @@
 # media extracted from archives.
 
 # Command line arguments:
-# -d directory	Optional. Scan for files in "directory". If omitted, use
+# -s directory	Optional. Scan for files in "directory". If omitted, use
 #               the default "Deluge=>Preferences=>Downloads=>Move completed to"
+# -x directory  Optional. Move the orphaned files to this directory. Consider this
+#               like a trash can. There is no option to delete files in this script
+#               as it's too dangerouse for noobs. You can easily delete the files
+#               from the trash can yourself with the rm -r command.
 
-# Get the directory to scan for orphaned files
+# Examples:
+#   listDelugeOrphans
+#        Scan the default download location and output orphaned_files.txt
+#        No files will be moved from the default download location.
+#
+#   listDelugeOrphans -s /home/user/mydownloads/deluge
+#        Scan the directory /home/user/mydownloads/deluge and output orphaned_filex.txt
+#        No files will be moved from the specified -s download location.
+#
+#   listDelugeOrphans -x /home/user/trashcan
+#        Scan the default download location and output orphaned_files.txt
+#        Move orphaned files from the default download location to the specified -x location
+#
+#   listDelugeOrphans -s /home/user/mydownloads/deluge -x /home/user/trashcan
+#        Scan the directory /home/user/mydownloads/deluge and output orphaned_filex.txt
+#        Move orphaned files from the specified -s download location to the specified -x location
 
-getopts ":d:" flag
-if [ $flag == 'd' ]
-then
-  directory=$OPTARG
-  COMPLETEDIR=$(echo $directory | sed 's![^/]$!&/!')
-else
-  COMPLETEDIR=$(cat ~/.config/deluge/core.conf | grep "move_completed_path\"" | cut -d":" -f2 | cut -c2- | cut -d"," -f1 | sed 's/\"//g' | sed 's![^/]$!&/!')
-fi
 
+# Extract script arguments
+while getopts ":s:x:" params; do
+  case "${params}" in
+    s)
+      directory=${OPTARG}
+      COMPLETEDIR=$(echo $directory | sed 's![^/]$!&/!')
+      ;;
+    x)
+      directory=${OPTARG}
+      TRASHCAN=$(echo $directory | sed 's![^/]$!&/!')
+      [[ "$TRASHCAN" != /* ]] && TRASHCAN="$PWD/$TRASHCAN"
+      [ ! -d "$TRASHCAN" ] && mkdir "$TRASHCAN"
+      [ ! -w "$TRASHCAN" ] && printf "\033[0;33m$TRASHCAN is not writable\033[0m\n" && exit
+      ;;
+   :)
+      printf "\033[0;33mError: -${OPTARG} requires a directory\033[0m\n"
+      exit
+      ;;
+   *)
+      printf "\033[0;33mError: Invalid argument\033[0m\n"
+      exit
+      ;;
+  esac
+done
+
+# Set the directory to be scanned for orphans
 if [ -z "$COMPLETEDIR" ]
 then
-  printf "\033[0;33mError: Can't extract deluge completed torrents directory\033[0m"
-  exit
-else
+  COMPLETEDIR=$(cat ~/.config/deluge/core.conf | grep "move_completed_path\"" | cut -d":" -f2 | cut -c2- | cut -d"," -f1 | sed 's/\"//g' | sed 's![^/]$!&/!')
+  if [ -z "$COMPLETEDIR" ]
+  then
+    printf "\033[0;33mError: Can't extract deluge completed torrents directory\033[0m"
+    exit
+  fi
+fi
+
+if [ -d $COMPLETEDIR ]
+then
   printf "\033[0;32mDirectory to scan:\033[0;33m $COMPLETEDIR\033[0m"
+else
+  printf "\033[0;33mError: directory $COMPLETEDIR does not exist\033[0m\n"
+  exit
 fi
 
 # Extract the Deluge port numbers
@@ -106,22 +156,43 @@ done
 sort -o delugefiles.tmp{,}
 
 # Get list of files in torrent completed folder
-find $COMPLETEDIR | sed "s|$COMPLETEDIR||" > completedfiles.tmp 
+find $COMPLETEDIR | sed "s|$COMPLETEDIR||" > completedfiles.tmp
 sort -o completedfiles.tmp{,}
 
 # Run a diff to find files in COMPLETEDIR but not in Deluge
 diff completedfiles.tmp delugefiles.tmp | grep '^<' | sed 's/^<\ //' | sed  "s|^|$COMPLETEDIR|" | tail -n +2 > orphaned_files.txt
+
+# Exit if nothing found
+if [ ! -s "orphaned_files.txt" ]
+then
+  printf "\033[0;32mNo orphan files found\033[0m\n"
+  rm "orphaned_files.txt"
+  exit
+fi
+
 sort -r -o orphaned_files.txt{,}
 
-printf "\033[0;32mFiles on file system but not in deluge are in: \033[0;33morphaned_files.txt\033[0m\n"
-
-printf "\nNo files are harmed during the making of utility\n"
-printf "It is your responsibiity to remove the orphaned files. Review orphaned_files.txt NOW!\n\n"
-printf "The following command attempts to delete all the files in orphaned_files.txt\n"
-printf "\033[0;31mDANGER: Copy and paste this command at your own risk!\033[0m\n"
-printf "\033[0;33mwhile read deletefiles; do  echo Deleting \"\$deletefiles\"; rm -d \"\$deletefiles\"; done < orphaned_files.txt ; rm orphaned_files.txt\033[0m\n"
-printf "\033[0;31m************** YOU HAVE BEEN WARNED! **************\033[0m\n"
+# Determine whether to move files. If no files in deluge are in scan directory, abort as probably user entered wrong directory to scan!
+if [ ! -z "$TRASHCAN" ]
+then
+  if [ $(awk 'a[$0]++' completedfiles.tmp delugefiles.tmp | wc -l) = 0 ]
+  then
+    printf "\033[0;31mWARNING:\033[0;32m Suspected incorrect scan directory detected. To protect your files the move has been cancelled.\033[0m\n"
+    printf "\033[0;32mReview the files that would have been moved with this command: \033[0;33mcat $PWD/orphaned_files.txt\033[0m\n"
+  else
+    printf "\033[0;32mMoving files to trash can: \033[0;33m$TRASHCAN\033[0m\n"
+    while read movefiles;
+    do
+      printf "\033[0;32mMoving \033[0;33m$movefiles\033[0m\n"
+      mv -u "$movefiles" "$TRASHCAN" 
+    done < orphaned_files.txt
+    printf "\033[0;32mFinished. After checking, you can remove the trash can directory\033[0m\n"
+    printf "\033[0;32mwith this command \033[0;33mrm -r \"$TRASHCAN\"\033[0m\n" 
+  fi
+else 
+  printf "\033[0;32mFiles in \033[0;33m$COMPLETEDIR\033[0;32m but not in deluge have been written to: \033[0;33morphaned_files.txt\033[0m\n" 
+  printf "\033[0;32mReview the files with this command: \033[0;33mcat $PWD/orphaned_files.txt\033[0m\n"
+fi
 
 # Tidy up temp files
 rm curl.tmp cookie_deluge.tmp delugefiles.tmp completedfiles.tmp 2> /dev/null || true
-
