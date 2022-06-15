@@ -164,7 +164,7 @@ baseUrl = "/autobrr/"
 #
 # Optional
 #
-logPath = "~/.apps/autobrr/autobrr.log"
+logPath = "${HOME}/.apps/autobrr/autobrr.log"
 
 # Log level
 #
