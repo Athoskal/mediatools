@@ -182,6 +182,8 @@ EOF
 ## Create user
 if [ "${status}" == 'fresh install' ]; then
    echo $password | autobrrctl --config $HOME/.apps/autobrr create-user $USER
+else
+   echo $password | autobrrctl --config ~/.apps/autobrr change-password $USER
 fi
 
 #Start systemd service
