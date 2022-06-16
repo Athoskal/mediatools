@@ -104,13 +104,9 @@ fi
 
 echo
 echo "Pulling new binaries.."
-wget -qO "${HOME}"/tmp/autobrr.tar.gz --content-disposition $(curl -s https://api.github.com/repos/autobrr/autobrr/releases/latest | grep download | grep linux_x86_64 | cut -d\" -f4)
-if [ $? -ne 0 ]; then
-  echo "That didn't work. Trying another way.."
-  parsedurl="https://github.com"$(curl -s https://github.com/autobrr/autobrr/releases/ | grep "/autobrr/autobrr/releases/download/v" | grep linux_x86_64 | head -1 | cut -d\" -f2)
-  echo $parsedurl
-  wget -qO "${HOME}"/tmp/autobrr.tar.gz --content-disposition $parsedurl
-fi
+parsedurl="https://github.com"$(curl -s https://github.com/autobrr/autobrr/releases/ | grep "/autobrr/autobrr/releases/download/v" | grep linux_x86_64 | head -1 | cut -d\" -f2)
+echo $parsedurl
+wget -qO "${HOME}"/tmp/autobrr.tar.gz --content-disposition $parsedurl
 tar -xzf "${HOME}"/tmp/autobrr.tar.gz -C "${HOME}/bin"
 
 #Install nginx conf
