@@ -204,10 +204,11 @@ fresh_install() {
         if systemctl --user is-active --quiet "audiobookshelf.service" && systemctl --user is-active --quiet "nginx.service"; then
             echo
             echo "audiobookshelf installation is complete."
-#           echo "Access audiobookshelf at the following URL:https://${USER}.${HOSTNAME}.usbx.me/audiobookshelf"
-            echo "Access audiobookshelf at the following URL:http://${HOSTNAME}.usbx.me:${port}"
+#           echo "Access audiobookshelf at the following URL: $(tput setaf 2)https://${USER}.${HOSTNAME}.usbx.me/audiobookshelf$(tput sgr0)"
+            echo
             echo "Your library paths have to be entered manually as the File Browser function does not work"
-            echo "Your path MUST start with $(pwd -P) followed with with path to your audio books. e.g. $(pwd -P)/media/AudioBooks"
+            echo "Your path MUST start with $(tput setaf 2)$(pwd -P)/$(tput sgr0) followed with with path to your audio books. e.g. $(tput setaf 2)$(pwd -P)/media/AudioBooks$(tput sgr0)"
+            echo
             [ -n "${backup}" ] && echo "Backup of old instance has been saved at ${backup}."
             echo
             exit
