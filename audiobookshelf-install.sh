@@ -207,7 +207,7 @@ fresh_install() {
 #           echo "Access audiobookshelf at the following URL:https://${USER}.${HOSTNAME}.usbx.me/audiobookshelf"
             echo "Access audiobookshelf at the following URL:http://${HOSTNAME}.usbx.me:${port}"
             echo "Your library paths have to be entered manually as the File Browser function does not work"
-            echo "Your path MUST start with $(pwd -P)"
+            echo "Your path MUST start with $(pwd -P) followed with with path to your audio books. e.g. $(pwd -P)/media/AudioBooks"
             [ -n "${backup}" ] && echo "Backup of old instance has been saved at ${backup}."
             echo
             exit
