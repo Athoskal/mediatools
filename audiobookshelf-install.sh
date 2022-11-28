@@ -216,7 +216,7 @@ fresh_install() {
             echo "Your library paths have to be entered manually as the File Browser function does not work on non-docker installs." 
             echo "Click where is says $(tput setaf 4)New folder path$(tput sgr0)."
             echo "Your path MUST start with $(tput setaf 2)$(pwd -P)/$(tput sgr0) followed with with path to your audio books. e.g. $(tput setaf 2)$(pwd -P)/media/AudioBooks$(tput sgr0)"
-            echo "Then TAB out of the field and click on $(tput setaf 2)Create$(tput sgr0)"
+            echo "Then TAB out of the field and click on $(tput setaf 2)Create $(tput sgr0)"
             echo
             [ -n "${backup}" ] && echo "Backup of old instance has been saved at ${backup}."
             echo
