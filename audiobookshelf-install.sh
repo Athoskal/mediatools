@@ -207,7 +207,7 @@ fresh_install() {
 #           echo "Access audiobookshelf at the following URL: $(tput setaf 2)https://${USER}.${HOSTNAME}.usbx.me/audiobookshelf $(tput sgr0)"
             echo "Access audiobookshelf at the following URL: $(tput setaf 2)http://${HOSTNAME}.usbx.me:${port} $(tput sgr0)"
             echo
-            echo "Your library paths have to be entered manually as the File Browser function does not work"
+            echo "Your library paths have to be entered manually as the File Browser function does not work. Click where is says `new folder path`."
             echo "Your path MUST start with $(tput setaf 2)$(pwd -P)/$(tput sgr0) followed with with path to your audio books. e.g. $(tput setaf 2)$(pwd -P)/media/AudioBooks$(tput sgr0)"
             echo
             [ -n "${backup}" ] && echo "Backup of old instance has been saved at ${backup}."
