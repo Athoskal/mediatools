@@ -104,8 +104,13 @@ latest_version_ffmpeg() {
     wget -qO ffmpeg.tar.xz "https://johnvansickle.com/ffmpeg/builds/ffmpeg-git-amd64-static.tar.xz" || {
         echo "Failed to get latest release of audiobookshelf-ffmpeg." && exit 1
     }
-
+    
     tar xf ffmpeg.tar.xz -C "$BASE_DIR/ffmpeg" --strip-components 1
+    
+    echo "Getting latest version of audiobookshelf-ffmpeg-tone"    
+    $((curl -s https://github.com/sandreas/tone | grep -om1 .*linux-x64.tar.gz) | sed s'/wget/wget -qO tone.tar.gz/g')
+    tar xf tone.tar.gz -C "$BASE_DIR/ffmpeg" --strip-components 1
+    
     cd "${HOME}" && rm -rf "${HOME}/.audiobookshelf-ffmpeg-tmp"
     echo
 }
@@ -139,6 +144,7 @@ Environment=CONFIG_PATH=$BASE_DIR/config
 Environment=METADATA_PATH=$BASE_DIR/metadata
 Environment=FFMPEG_PATH=$BASE_DIR/ffmpeg/ffmpeg
 Environment=FFPROBE_PATH=$BASE_DIR/ffmpeg/ffprobe
+Environment=TONE_PATH=$BASE_DIR/ffmpeg/tone
 WorkingDirectory=$BASE_DIR
 ExecStart=$BASE_DIR/audiobookshelf
 ExecReload=/bin/kill -HUP \$MAINPID
