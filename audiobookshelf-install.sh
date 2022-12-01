@@ -20,12 +20,13 @@ cd "${HOME}" || exit 1
 port_picker() {
   port=''
   while [ -z "${port}" ]; do
+    echo "Getting list of free ports..."
     app-ports free
     echo "Pick any application from the list above, that you're not currently using."
     echo "We'll be using this port for audiobookshelf."
     read -rp "$(tput setaf 4)$(tput bold)Application name in full[Example: pyload]: $(tput sgr0)" appname
-    proper_app_name=$(app-ports free | grep -i "${appname}" | head -n 1 | cut -c 7-) || proper_app_name=''
-    port=$(app-ports free | grep -i "${appname}" | head -n 1 | awk '{print $1}') || port=''
+    proper_app_name=$(app-ports show | grep -i "${appname}" | head -n 1 | cut -c 7-) || proper_app_name=''
+    port=$(app-ports show | grep -i "${appname}" | head -n 1 | awk '{print $1}') || port=''
     if [ -z "${port}" ]; then
       echo "$(tput setaf 1)Invalid choice! Please choose an application from the list and avoid typos.$(tput sgr0)"
       echo "$(tput bold)Listing all applications again..$(tput sgr0)"
