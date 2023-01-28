@@ -84,8 +84,8 @@ required_paths() {
 
 latest_version() {
     echo "Getting latest version of audiobookshelf.."
-    LATEST_RELEASE="https://raw.githubusercontent.com/advplyr/audiobookshelf-ppa/master/"$(curl -s https://github.com/advplyr/audiobookshelf-ppa/ |
-                   grep  -o "audiobookshelf_.*deb" | tail -1 | awk -F\" '{print $1'})
+    LATEST_VERSION=$(curl -L -s -H 'Accept: application/json' https://github.com/advplyr/audiobookshelf/releases/latest | cut -d\" -f6 | cut -dv -f2)
+    LATEST_RELEASE="https://github.com/advplyr/audiobookshelf-ppa/blob/master/audiobookshelf_${LATEST_VERSION}_amd64.deb?raw=true"
     mkdir -p "${HOME}/.audiobookshelf-tmp" && cd "${HOME}/.audiobookshelf-tmp"
     rm -rf "$BASE_DIR/audiobookshelf"
     wget -qO audiobookshelf.deb "${LATEST_RELEASE}" || {
