@@ -238,7 +238,7 @@ if [ -d "${HOME}/.config/audiobookshelf" ]; then
     echo "How do you wish to proceed? In all cases except quit, audiobookshelf will be backed up."
 
 #    select status in 'Fresh Install' 'Update & Repair' 'Change Password' 'Uninstall' 'Quit'; do
-     select status in 'Fresh Install' 'Uninstall' 'Quit'; do
+     select status in 'Fresh Install' 'Update & Repair' 'Uninstall' 'Quit'; do
         case ${status} in
         'Fresh Install')
             uninstall
@@ -259,6 +259,7 @@ if [ -d "${HOME}/.config/audiobookshelf" ]; then
             port_picker
             required_paths
             latest_version
+            latest_version_ffmpeg
             nginx_conf
             systemd_service
             systemctl --user restart audiobookshelf.service
